@@ -39,6 +39,13 @@ android {
     buildFeatures {
         compose = true
     }
+
+    packagingOptions {
+        resources {
+            // evita conflito de arquivo duplicado entre compilers
+            pickFirsts += "META-INF/gradle/incremental.annotation.processors"
+        }
+    }
 }
 
 dependencies {
@@ -50,6 +57,7 @@ dependencies {
     implementation(libs.androidx.compose.ui.graphics)
     implementation(libs.androidx.compose.ui.tooling.preview)
     implementation(libs.androidx.compose.material3)
+    implementation(libs.androidx.navigation.compose)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
@@ -64,5 +72,11 @@ dependencies {
     implementation("com.squareup.okhttp3:okhttp:4.9.0")
     implementation("com.squareup.okhttp3:logging-interceptor:4.9.0")
 
+    implementation("androidx.palette:palette:1.0.0")
 
+    // Gson (used by Retrofit converter)
+    implementation("com.google.code.gson:gson:2.10.1")
+
+    // Timber (logging)
+    implementation("com.jakewharton.timber:timber:4.7.1")
 }

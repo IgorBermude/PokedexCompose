@@ -1,8 +1,7 @@
 package com.example.pokedex.domain.models
 
-data class Pokemon (
+data class EvolutionStage(
     val id: Int,
     val name: String,
-    val imageUrl: String,
-    val description: String
+    val imageUrl: String
 )
