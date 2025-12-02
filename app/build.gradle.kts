@@ -58,6 +58,7 @@ dependencies {
     implementation(libs.androidx.compose.ui.tooling.preview)
     implementation(libs.androidx.compose.material3)
     implementation(libs.androidx.navigation.compose)
+    implementation(libs.volley)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
@@ -79,4 +80,7 @@ dependencies {
 
     // Timber (logging)
     implementation("com.jakewharton.timber:timber:4.7.1")
+
+    // Coil
+    implementation("io.coil-kt:coil-compose:2.5.0")
 }
