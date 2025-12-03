@@ -1,10 +1,10 @@
 package com.example.pokedex.ui.list
 
-import android.icu.text.StringSearch
-import android.telecom.StatusHints
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.combinedClickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -18,28 +18,31 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.BasicText
 import androidx.compose.foundation.text.BasicTextField
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Divider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.scale
 import androidx.compose.ui.draw.shadow
-import androidx.compose.ui.focus.FocusState
 import androidx.compose.ui.focus.onFocusChanged
-import androidx.compose.ui.focus.onFocusEvent
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
@@ -49,39 +52,96 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.example.pokedex.R
 import com.example.pokedex.domain.models.PokedexListEntry
+import java.util.Map.entry
 
 @Composable
-fun PokemonListScreen (
+fun PokemonListScreen(
     navController: NavController,
     viewModel: PokemonListViewModel
 ) {
+    val team = remember { mutableStateListOf<PokedexListEntry>() }
+
     Surface(
         color = MaterialTheme.colorScheme.background,
         modifier = Modifier.fillMaxSize()
     ) {
-        Column {
+        Column(
+            modifier = Modifier.fillMaxSize()
+        ) {
+            // Cabeçalho com logo
             Spacer(modifier = Modifier.height(20.dp))
-            Image(
-                painter = painterResource(id = R.drawable.ic_international_pok_mon_logo),
-                contentDescription = "Pokemon",
-                modifier = Modifier.fillMaxWidth().align(Alignment.CenterHorizontally)
-            )
+            Box(
+                modifier = Modifier.fillMaxWidth(),
+                contentAlignment = Alignment.Center
+            ) {
+                Image(
+                    painter = painterResource(id = R.drawable.ic_international_pok_mon_logo),
+                    contentDescription = "Pokemon",
+                    modifier = Modifier
+                        .fillMaxWidth()
+                )
+            }
+            Spacer(modifier = Modifier.height(16.dp))
+
+            // Barra de pesquisa
             SearchBar(
                 hint = "Search...",
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(16.dp)
-            ){
+                    .padding(16.dp, vertical = 7.dp)
+            ) {
                 viewModel.searchPokemonList(it)
             }
             Spacer(modifier = Modifier.height(16.dp))
-            PokedexList(navController = navController, viewModel = viewModel)
+
+            // Lista de Pokémon do time
+            if (team.isNotEmpty()) {
+                // Texto de cabeçalho do time
+                Text(
+                    text = "Seu time",
+                    color = Color.Gray,
+                    modifier = Modifier
+                        .padding(horizontal = 20.dp)
+                        .align(Alignment.CenterHorizontally)
+                )
+                LazyRow(
+                    contentPadding = PaddingValues(16.dp),
+                    horizontalArrangement = Arrangement.spacedBy(16.dp)
+                ) {
+                    // Lista de Pokémon do time
+                    items(
+                        items = team,
+                        key = {entry -> entry.pokemonName}
+                    ) { entry ->
+                        PokedexEntry(
+                            entry = entry,
+                            navController = navController,
+                            modifier = Modifier.size(150.dp), // ajusta tamanho do card no time
+                            viewModel = viewModel,
+                            team = team
+                        )
+                    }
+                }
+
+                // Separador entre o time e a lista principal
+                Divider(
+                    color = Color.LightGray,
+                    thickness = 1.dp,
+                    modifier = Modifier.padding(vertical = 8.dp)
+                )
+            }
+
+            // Lista principal de Pokémon
+            PokedexList(
+                navController = navController,
+                viewModel = viewModel,
+                team = team
+            )
         }
     }
 }
@@ -129,61 +189,19 @@ fun SearchBar(
 }
 
 @Composable
-fun PokedexList(
-    navController: NavController,
-    viewModel: PokemonListViewModel
-) {
-    val pokemonList by remember { viewModel.pokemonList }
-    val endReached by remember { viewModel.endReached }
-    val loadError by remember { viewModel.loadError }
-    val isLoading by remember { viewModel.isLoading }
-    val isSearching by remember { viewModel.isSearching }
-
-    LazyColumn(
-        contentPadding = PaddingValues(16.dp)
-    ) {
-        val itemCount = if (pokemonList.size % 2 == 0) {
-            pokemonList.size / 2
-        } else {
-            pokemonList.size / 2 + 1
-        }
-        items(itemCount) { index ->
-            if (index >= itemCount - 1 && !endReached && !isLoading && !isSearching) {
-                viewModel.loadPokemonPaginates()
-            }
-            PokedexRow(rowIndex = index, entries = pokemonList, navController = navController, viewModel = viewModel)
-        }
-    }
-
-    Box(
-        contentAlignment = Alignment.Center,
-        modifier = Modifier.fillMaxSize()
-    ) {
-        if(isLoading){
-            CircularProgressIndicator(color = MaterialTheme.colorScheme.primary)
-        }
-        if(loadError.isNotEmpty()){
-            RetrySection(error = loadError) {
-                viewModel.loadPokemonPaginates()
-            }
-        }
-    }
-
-}
-
-@Composable
 fun PokedexEntry(
     entry: PokedexListEntry,
     navController: NavController,
     modifier: Modifier = Modifier,
-    viewModel: PokemonListViewModel
+    viewModel: PokemonListViewModel,
+    team: MutableList<PokedexListEntry>
 ) {
     val defaultDominantColor = MaterialTheme.colorScheme.surface
     val dominantColor = remember { mutableStateOf(defaultDominantColor) }
 
     Box(
         contentAlignment = Alignment.Center,
-        modifier = Modifier
+        modifier = modifier
             .shadow(5.dp, RoundedCornerShape(10.dp))
             .clip(RoundedCornerShape(10.dp))
             .aspectRatio(1f)
@@ -195,11 +213,18 @@ fun PokedexEntry(
                     )
                 )
             )
-            .clickable {
-                navController.navigate(
-                    "pokemon_detail_screen/${dominantColor.value.toArgb()}/${entry.pokemonName}"
-                )
-            }
+            .combinedClickable(
+                onClick = {
+                    navController.navigate(
+                        "pokemon_detail_screen/${dominantColor.value.toArgb()}/${entry.pokemonName}"
+                    )
+                },
+                onLongClick = {
+                    if (team.size < 6 && !team.contains(entry)) {
+                        team.add(entry)
+                    }
+                }
+            )
     ) {
         Column {
             AsyncImage(
@@ -225,6 +250,61 @@ fun PokedexEntry(
                 textAlign = TextAlign.Center,
                 modifier = Modifier.fillMaxWidth()
             )
+            Text(
+                text = entry.number.toString(),
+                fontSize = 18.sp,
+                textAlign = TextAlign.Center,
+                modifier = Modifier.fillMaxWidth()
+            )
+        }
+    }
+}
+
+@Composable
+fun PokedexList(
+    navController: NavController,
+    viewModel: PokemonListViewModel,
+    team: MutableList<PokedexListEntry>
+) {
+    val pokemonList by remember { viewModel.pokemonList }
+    val endReached by remember { viewModel.endReached }
+    val loadError by remember { viewModel.loadError }
+    val isLoading by remember { viewModel.isLoading }
+    val isSearching by remember { viewModel.isSearching }
+
+    LazyColumn(
+        contentPadding = PaddingValues(16.dp)
+    ) {
+        val itemCount = if (pokemonList.size % 2 == 0) {
+            pokemonList.size / 2
+        } else {
+            pokemonList.size / 2 + 1
+        }
+        items(itemCount) { index ->
+            if (index >= itemCount - 1 && !endReached && !isLoading && !isSearching) {
+                viewModel.loadPokemonPaginates()
+            }
+            PokedexRow(
+                rowIndex = index,
+                entries = pokemonList,
+                navController = navController,
+                viewModel = viewModel,
+                team = team
+            )
+        }
+    }
+
+    Box(
+        contentAlignment = Alignment.Center,
+        modifier = Modifier.fillMaxSize()
+    ) {
+        if(isLoading){
+            CircularProgressIndicator(color = MaterialTheme.colorScheme.primary)
+        }
+        if(loadError.isNotEmpty()){
+            RetrySection(error = loadError) {
+                viewModel.loadPokemonPaginates()
+            }
         }
     }
 }
@@ -234,23 +314,26 @@ fun PokedexRow(
     rowIndex: Int,
     entries: List<PokedexListEntry>,
     navController: NavController,
-    viewModel: PokemonListViewModel // adicionada passagem do mesmo viewModel
+    viewModel: PokemonListViewModel,
+    team: MutableList<PokedexListEntry>,
 ){
-    Column {
+    Column() {
         Row{
             PokedexEntry(
                 entry = entries[rowIndex * 2],
                 navController = navController,
                 modifier = Modifier.weight(1f),
-                viewModel = viewModel
+                viewModel = viewModel,
+                team = team
             )
             Spacer(modifier = Modifier.width(16.dp))
             if(entries.size >= rowIndex * 2 + 2){
                 PokedexEntry(
-                    entry = entries[rowIndex * 2], // mantido conforme código original (fora do escopo de alteração)
+                    entry = entries[rowIndex * 2 + 1],
                     navController = navController,
                     modifier = Modifier.weight(1f),
-                    viewModel = viewModel
+                    viewModel = viewModel,
+                    team = team
                 )
             } else{
                 Spacer(modifier = Modifier.weight(1f))

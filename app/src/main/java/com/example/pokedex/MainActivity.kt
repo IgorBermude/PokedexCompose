@@ -6,6 +6,7 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.runtime.remember
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.pokedex.data.repository.PokemonRepositoryImpl
 import com.example.pokedex.ui.list.PokemonListViewModelFactory
@@ -20,6 +21,10 @@ import com.example.pokedex.ui.theme.PokedexTheme
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import com.example.pokedex.data.remote.PokemonApi
+import com.example.pokedex.ui.detail.PokemonDetailScreen
+import com.example.pokedex.ui.detail.PokemonDetailViewModel
+import com.example.pokedex.ui.detail.PokemonDetailViewModelFactory
+import java.util.Locale
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -58,15 +63,24 @@ class MainActivity : ComponentActivity() {
                                 type = NavType.StringType
                             }
                         )
-                    ) {
+                    ) { backStackEntry ->
                         val dominantColor = remember {
-                            val color = it.arguments?.getInt("dominantColor")
+                            val color = backStackEntry.arguments?.getInt("dominantColor")
                             color?.let { Color(it) } ?: Color.White
                         }
-                        val pokemonName = remember {
-                            it.arguments?.getString("pokemonName")
-                        }
+                        val pokemonName = remember { backStackEntry.arguments?.getString("pokemonName") }
 
+                        val pokemonDetailFactory = remember { PokemonDetailViewModelFactory(repo) }
+                        val pokemonDetailViewModel: PokemonDetailViewModel = viewModel(factory = pokemonDetailFactory)
+
+                        PokemonDetailScreen(
+                            dominantColor = dominantColor,
+                            pokemonName = pokemonName?.lowercase(Locale.ROOT) ?: "",
+                            navController = navController,
+                            topPadding = 16.dp,
+                            pokemonImageSize = 200.dp,
+                            viewModel = pokemonDetailViewModel
+                        )
                     }
                 }
             }
