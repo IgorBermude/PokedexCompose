@@ -68,6 +68,11 @@ dependencies {
     debugImplementation(libs.androidx.compose.ui.test.manifest)
 
     // Retrofit
+    /*  biblioteca que permite definir endpoints como interfaces Kotlin com suporte a suspend/coroutines,
+        delega serialização JSON ao converter-gson, integra-se ao OkHttp (e logging-interceptor)
+        para controle e depuração das requisições, centraliza tratamento de erros e respostas
+        no repositório e facilita testes e manutenção ao desacoplar a camada de rede da UI
+     */
     implementation("com.squareup.retrofit2:retrofit:2.9.0")
     implementation("com.squareup.retrofit2:converter-gson:2.9.0")
     implementation("com.squareup.okhttp3:okhttp:4.9.0")
@@ -75,12 +80,20 @@ dependencies {
 
     implementation("androidx.palette:palette:1.0.0")
 
-    // Gson (used by Retrofit converter)
+    // Gson (usado por Retrofit converter para para serialização e desserialização JSON em Java/Kotlin)
     implementation("com.google.code.gson:gson:2.10.1")
 
     // Timber (logging)
+    /*
+        biblioteca de logging leve (por Jake Wharton) que simplifica o uso do Log do Android: fornece
+        chamadas estáticas fáceis (Timber.d, Timber.e, etc.)
+     */
     implementation("com.jakewharton.timber:timber:4.7.1")
 
     // Coil
+    /*
+        biblioteca moderna para carregamento de imagens em Android escrita em Kotlin, otimizada para
+        desempenho e integração com Jetpack Compose via coil-compose.
+     */
     implementation("io.coil-kt:coil-compose:2.5.0")
 }

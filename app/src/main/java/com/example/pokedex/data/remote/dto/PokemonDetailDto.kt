@@ -4,8 +4,8 @@ data class PokemonDetailDto(
     val id: Int,
     val name: String,
     val sprites: SpritesDto,
-    val weight: Int,
-    val height: Int,
+    val weight: Float,
+    val height: Float,
     val stats: List<StatDto>,
     val types: List<TypeSlotDto>
 ) {

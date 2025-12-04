@@ -5,12 +5,17 @@ import com.example.pokedex.data.remote.dto.PokemonListItemDto
 import com.example.pokedex.domain.models.Pokemon
 import com.example.pokedex.domain.models.PokemonStat
 
+// Ajuda as funções a mapear os DTOs para os domans
+
+// Função para extrair o ID de uma URL
 private fun extractId(url: String): Int =
     url.trimEnd('/').substringAfterLast('/').toIntOrNull() ?: -1
 
+// Pega a imagem oficial do Pokémon
 private fun officialArtworkUrl(id: Int): String =
     "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/$id.png"
 
+// Mapeia o DTO da lista de Pokémon para o domínio
 fun PokemonListItemDto.toDomain(): Pokemon {
     val id = extractId(url)
     return Pokemon(
@@ -18,8 +23,8 @@ fun PokemonListItemDto.toDomain(): Pokemon {
         name = name,
         imageUrl = officialArtworkUrl(id),
         description = "",
-        weight = 0,
-        height = 0,
+        weight = 0f,
+        height = 0f,
         stats = emptyList()
     )
 }

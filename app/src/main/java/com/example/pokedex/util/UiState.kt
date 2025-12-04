@@ -1,5 +1,6 @@
 package com.example.pokedex.util
 
+// Estados de UI
 sealed class UiState<T>(
     val data: T? = null,
     val message: String? = null

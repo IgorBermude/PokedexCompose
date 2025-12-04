@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import com.example.pokedex.data.repository.PokemonRepository
 
+// Factory para criar instâncias de PokemonListViewModel
 class PokemonListViewModelFactory(
     private val repository: PokemonRepository
 ) : ViewModelProvider.Factory {
