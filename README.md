@@ -2,8 +2,9 @@
 
 Este repositório contém um aplicativo Pokedex exemplo em Kotlin usando Jetpack Compose. O app consome a PokeAPI via Retrofit e exibe uma lista de Pokemons, detalhes, e permite ao usuário montar um time (até 6 pokemons).
 
-> Idioma: Português
-
+<p align="center">
+  <img src="https://github.com/user-attachments/assets/b57df211-26f2-49a4-b66c-5962bc3e37a5" alt="print-pokedex" width="360" style="height:auto;" />
+</p>
 ---
 
 ## Visão Geral
